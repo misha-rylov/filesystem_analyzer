@@ -329,3 +329,205 @@ rule ransomware_indicator
   condition:
     2 of them
 }
+
+/*
+ * Media File Rules - Video/Audio with malicious metadata
+ */
+
+rule media_embedded_executable
+{
+  meta:
+    author = "CorpSec"
+    description = "Media file contains embedded executable (MZ header)"
+    severity = "critical"
+  strings:
+    $mz = "MZ" ascii
+  condition:
+    $mz
+}
+
+rule media_xml_entity_injection
+{
+  meta:
+    author = "CorpSec"
+    description = "Media file contains XML external entity (XXE) - potential SSRF"
+    severity = "high"
+  strings:
+    $xxe1 = "<!ENTITY" nocase
+    $xxe2 = "SYSTEM " nocase
+    $xxe3 = "PUBLIC " nocase
+  condition:
+    any of them
+}
+
+rule media_script_in_metadata
+{
+  meta:
+    author = "CorpSec"
+    description = "Media file metadata contains script-like content"
+    severity = "high"
+  strings:
+    $script1 = "<script" nocase
+    $script2 = "javascript:" nocase
+    $script3 = "vbscript:" nocase
+    $script4 = "onerror=" nocase
+    $script5 = "onload=" nocase
+  condition:
+    any of them
+}
+
+rule media_suspicious_url
+{
+  meta:
+    author = "CorpSec"
+    description = "Media file contains suspicious URL in metadata"
+    severity = "medium"
+  strings:
+    $url1 = "http://" ascii
+    $url2 = "https://" ascii
+    $url3 = "ftp://" ascii
+    $url4 = "tftp://" ascii
+  condition:
+    any of them
+}
+
+rule media_long_url
+{
+  meta:
+    author = "CorpSec"
+    description = "Media file contains unusually long URL - potential exfiltration"
+    severity = "medium"
+  strings:
+    $longurl = /https?:\/\/[a-zA-Z0-9\-\.\_\~\:\/\?\#\[\@\!\$\&\'\(\)\*\+\,\;\=\%]{100,}/
+  condition:
+    $longurl
+}
+
+rule media_ip_in_url
+{
+  meta:
+    author = "CorpSec"
+    description = "Media file contains IP-based URL - suspicious"
+    severity = "medium"
+  strings:
+    $ipurl = /https?:\/\/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/
+  condition:
+    $ipurl
+}
+
+rule media_base64_content
+{
+  meta:
+    author = "CorpSec"
+    description = "Media file contains base64 encoded content"
+    severity = "medium"
+  strings:
+    $b64 = /[A-Za-z0-9+\/]{50,}={0,2}/
+  condition:
+    $b64
+}
+
+rule media_powershell_command
+{
+  meta:
+    author = "CorpSec"
+    description = "Media file contains PowerShell command"
+    severity = "high"
+  strings:
+    $ps1 = "powershell" nocase
+    $ps2 = "powershell.exe" nocase
+    $ps3 = "IEX " nocase
+    $ps4 = "Invoke-Expression" nocase
+    $ps5 = "DownloadString" nocase
+    $ps6 = "cmd.exe" nocase
+    $ps7 = "certutil" nocase
+  condition:
+    any of them
+}
+
+rule media_wmi_command
+{
+  meta:
+    author = "CorpSec"
+    description = "Media file contains WMI command"
+    severity = "high"
+  strings:
+    $wmi1 = "winmgmt" nocase
+    $wmi2 = "IWbemServices" nocase
+    $wmi3 = "ExecQuery" nocase
+  condition:
+    any of them
+}
+
+rule media_registry_modification
+{
+  meta:
+    author = "CorpSec"
+    description = "Media file contains registry modification commands"
+    severity = "high"
+  strings:
+    $reg1 = "reg add" nocase
+    $reg2 = "reg delete" nocase
+    $reg3 = "HKLM\\" nocase
+    $reg4 = "HKCU\\" nocase
+    $reg5 = "HKEY_LOCAL_MACHINE" nocase
+    $reg6 = "HKEY_CURRENT_USER" nocase
+  condition:
+    any of them
+}
+
+rule media_network_connection
+{
+  meta:
+    author = "CorpSec"
+    description = "Media file contains network connection indicators"
+    severity = "medium"
+  strings:
+    $net1 = "socket" nocase
+    $net2 = "connect(" nocase
+    $net3 = "tcp://" nocase
+    $net4 = "udp://" nocase
+    $net5 = "WinSock" nocase
+  condition:
+    any of them
+}
+
+rule media_crypto_api
+{
+  meta:
+    author = "CorpSec"
+    description = "Media file contains cryptographic API usage"
+    severity = "medium"
+  strings:
+    $crypto1 = "CryptEncrypt" nocase
+    $crypto2 = "CryptDecrypt" nocase
+    $crypto3 = "CreateCryptContext" nocase
+    $crypto4 = "RsaEncrypt" nocase
+    $crypto5 = "AesEncrypt" nocase
+  condition:
+    any of them
+}
+
+rule media_id3_suspicious
+{
+  meta:
+    author = "CorpSec"
+    description = "ID3 tag contains suspicious content"
+  strings:
+    $id3 = "ID3" ascii
+    $url = "http" ascii
+  condition:
+    $id3 and $url
+}
+
+rule media_flac_metadata
+{
+  meta:
+    author = "CorpSec"
+    description = "FLAC metadata block contains suspicious content"
+  strings:
+    $flac = "fLaC" ascii
+    $comment = "COMMENT" nocase
+  condition:
+    $flac and $comment
+}

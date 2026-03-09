@@ -4,10 +4,18 @@
 
 bool Scanner::is_supported_extension(const std::filesystem::path& p) const {
     static const std::unordered_set<std::string> exts = {
-        ".sys", ".bat", ".cmd", ".ps1",
-        ".js", ".vbs", ".jar", ".apk", ".pdf", ".doc",
-        ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
-        ".zip", ".rar", ".7z", ".so", ".bin"
+        // Documents
+        ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+        // Archives
+        ".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz",
+        // Executables / Libraries
+        ".sys", ".so", ".bin", ".dylib", ".dll",
+        // Scripts
+        ".js", ".vbs", ".bat", ".cmd", ".ps1", ".jar", ".apk",
+        // Video
+        ".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm", ".m4v", ".mpg", ".mpeg", ".3gp", ".ogv",
+        // Audio
+        ".mp3", ".wav", ".flac", ".aac", ".ogg", ".wma", ".m4a", ".mid", ".amr"
     };
 
     auto ext = p.extension().string();
